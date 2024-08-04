@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <gmp.h>
 
-#define FLOAT_BIT 20000000
 #define N 1000001 // 読み込み桁数
+int INIT_BIT = N*3.4;
 
 char fname_calc[] = "calc_pi.txt";
 char fname_correct[] = "correct_pi.txt";
@@ -33,9 +33,9 @@ int main(){
     fgets(str_correct, N, fp_correct);
 
     mpf_t correct_num, calc_num, diff;
-    mpf_init2(correct_num, FLOAT_BIT);  //正確な値
-    mpf_init2(calc_num, FLOAT_BIT);     //計算値
-    mpf_init2(diff, FLOAT_BIT);         //計算誤差
+    mpf_init2(correct_num, INIT_BIT);  //正確な値
+    mpf_init2(calc_num, INIT_BIT);     //計算値
+    mpf_init2(diff, INIT_BIT);         //計算誤差
 
     mpf_set_str(calc_num,str_calc,10);
     mpf_set_str(correct_num,str_correct,10);
