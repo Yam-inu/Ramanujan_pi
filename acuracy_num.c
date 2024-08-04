@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <gmp.h>
 
-#define FLOAT_BIT 100000
-#define N 100001 // 読み込み桁数
+#define FLOAT_BIT 20000000
+#define N 1000001 // 読み込み桁数
 
 char fname_calc[] = "calc_pi.txt";
 char fname_correct[] = "correct_pi.txt";
@@ -58,7 +58,7 @@ int main(){
         count_digit++;
     }
 
-    printf("精度: 小数点%d桁\n", count_digit-1);
+    printf("精度: 小数点以下%d桁\n", count_digit-1);
     
     mpf_clear(correct_num);
     mpf_clear(calc_num);
