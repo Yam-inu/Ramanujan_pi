@@ -1,48 +1,30 @@
 // gcc Ramanujan_pi.c -o Ramanujan_pi -lgmp -lm -fopenmp && time ./Ramanujan_pi > calc_pi.txt
-// gcc Ramanujan_pi.c -o Ramanujan_pi -lgmp -lm -fopenmp && time ./Ramanujan_pi > calc_pi.txt && gcc pi_acuracy.c -o pi_acuracy -lgmp -fopenmp && ./pi_acuracy
+// gcc Ramanujan_pi.c -o Ramanujan_pi -lgmp -lm -fopenmp && time ./Ramanujan_pi > calc_pi.txt && gcc acuracy_num.c -o acuracy_num -lgmp -fopenmp && ./acuracy_num
 
 #include <stdio.h>
 #include <gmp.h>
 #include <math.h>
 #include <omp.h>
 
-#define EXPECT_DIGIT 100000
+#define EXPECT_DIGIT 500000
 
 int REPEAT_NUM = EXPECT_DIGIT/7.9; // 繰り返し回数
-int INIT_BIT = EXPECT_DIGIT*3.4;     // 変数が確保する領域
+int INIT_BIT = EXPECT_DIGIT*3.4;   // 変数が確保する領域
 
 void factorial(mpz_t result, unsigned long int n) {
     mpz_set_ui(result, 1);
-    #pragma omp parallel for
     for (unsigned long int i = 1; i <= n; i++) {
         mpz_mul_ui(result, result, i);
     }
 }
 
-void power_ui_ui(mpz_t result, unsigned long int base, unsigned long int exponent){
-    mpz_set_ui(result, 1);
-    #pragma omp parallel for
-    for(unsigned long int i=0; i<exponent; i++){
-        mpz_mul_ui(result, result, base);
-    }
-}
-
-void power_mpz_ui(mpz_t result, mpz_t base, unsigned long int exponent){
-    mpz_t tmp;
-    mpz_init2(tmp, INIT_BIT);
-    mpz_set_ui(tmp, 1);
-    #pragma omp parallel for
-    for(unsigned long int i=0; i<exponent; i++){
-        mpz_mul(tmp, tmp, base);
-    }
-    mpz_swap(tmp, result);
-    mpz_clear(tmp);
-}
-
 int main() {
+    mpz_t _4, _99;
     mpf_t pi_inverse;
     mpf_init2(pi_inverse, INIT_BIT);
     mpf_set_ui(pi_inverse, 0);
+    mpz_init_set_ui(_4, 4);
+    mpz_init_set_ui(_99, 99);
 
     #pragma omp parallel
     {
@@ -61,17 +43,17 @@ int main() {
             mpz_init2(tmp, INIT_BIT);
             mpf_init2(tmp_f, INIT_BIT);
             mpf_init2(block3_f, INIT_BIT);
-            unsigned long int _4n = 4 * n;
-            factorial(_4n_fact, _4n);
 
             unsigned long int block2 = 1103 + (26390 * n);
-
-            power_ui_ui(_4pown, 4, n);
-            power_ui_ui(_99pown, 99, n);
+            unsigned long int _4n = 4 * n;
+            factorial(_4n_fact, _4n);
+            
+            mpz_pow_ui(_4pown, _4, n);
+            mpz_pow_ui(_99pown, _99, n);
             factorial(n_fact, n);
             mpz_mul(block3, _4pown, _99pown);
             mpz_mul(block3, block3, n_fact);
-            power_mpz_ui(block3, block3, 4);
+            mpz_pow_ui(block3, block3, 4);
 
             mpz_mul_ui(tmp, _4n_fact, block2);
             mpf_set_z(tmp_f, tmp);
@@ -96,6 +78,7 @@ int main() {
 
         mpf_clear(local_result);
     }
+    mpz_clear(_4);
 
     mpf_t sqrt2, _2sqrt2;
     mpf_init2(sqrt2, INIT_BIT);
@@ -104,12 +87,11 @@ int main() {
     mpf_mul_ui(_2sqrt2, sqrt2, 2);
     mpf_clear(sqrt2);
 
-    mpz_t _99, _99squared;
+    mpz_t _99squared;
     mpf_t _99squared_f;
-    mpz_init_set_ui(_99, 99);
     mpz_init(_99squared);
     mpf_init(_99squared_f);
-    power_mpz_ui(_99squared, _99, 2);
+    mpz_pow_ui(_99squared, _99, 2);
     mpf_set_z(_99squared_f, _99squared);
     mpz_clear(_99);
     mpz_clear(_99squared);
