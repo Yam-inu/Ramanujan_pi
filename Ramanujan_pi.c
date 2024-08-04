@@ -1,5 +1,5 @@
-#define REPEAT_NUM 7000
-#define FLOAT_BIT 35000
+#define REPEAT_NUM 100000
+#define FLOAT_BIT 20000000
 
 #include <stdio.h>
 #include <gmp.h>
@@ -41,19 +41,21 @@ int main() {
 
     #pragma omp parallel
     {
-        mpz_t _4n_fact, _4pown, _99pown, n_fact, block3, tmp;
-        mpf_t tmp_f, block3_f;
-        mpz_init2(_4n_fact, FLOAT_BIT);
-        mpz_init2(_4pown, FLOAT_BIT);
-        mpz_init2(_99pown, FLOAT_BIT);
-        mpz_init2(n_fact, FLOAT_BIT);
-        mpz_init2(block3, FLOAT_BIT);
-        mpz_init2(tmp, FLOAT_BIT);
-        mpf_init2(tmp_f, FLOAT_BIT);
-        mpf_init2(block3_f, FLOAT_BIT);
+        mpf_t local_result;
+        mpf_init2(local_result, FLOAT_BIT);
 
-        #pragma omp for schedule(static)
+        #pragma omp for
         for (unsigned long int n = 0; n < REPEAT_NUM; n++) {
+            mpz_t _4n_fact, _4pown, _99pown, n_fact, block3, tmp;
+            mpf_t tmp_f, block3_f;
+            mpz_init2(_4n_fact, FLOAT_BIT);
+            mpz_init2(_4pown, FLOAT_BIT);
+            mpz_init2(_99pown, FLOAT_BIT);
+            mpz_init2(n_fact, FLOAT_BIT);
+            mpz_init2(block3, FLOAT_BIT);
+            mpz_init2(tmp, FLOAT_BIT);
+            mpf_init2(tmp_f, FLOAT_BIT);
+            mpf_init2(block3_f, FLOAT_BIT);
             unsigned long int _4n = 4 * n;
             factorial(_4n_fact, _4n);
 
@@ -70,17 +72,24 @@ int main() {
             mpf_set_z(tmp_f, tmp);
             mpf_set_z(block3_f, block3);
             mpf_div(tmp_f, tmp_f, block3_f);
-            mpf_add(pi_inverse, pi_inverse, tmp_f);
+            mpf_add(local_result, local_result, tmp_f);
+
+            mpz_clear(_4n_fact);
+            mpz_clear(_4pown);
+            mpz_clear(_99pown);
+            mpz_clear(n_fact);
+            mpz_clear(block3);
+            mpz_clear(tmp);
+            mpf_clear(tmp_f);
+            mpf_clear(block3_f);
         }
 
-        mpz_clear(_4n_fact);
-        mpz_clear(_4pown);
-        mpz_clear(_99pown);
-        mpz_clear(n_fact);
-        mpz_clear(block3);
-        mpz_clear(tmp);
-        mpf_clear(tmp_f);
-        mpf_clear(block3_f);
+        #pragma omp critical
+        {
+            mpf_add(pi_inverse, pi_inverse, local_result);
+        }
+
+        mpf_clear(local_result);
     }
 
     mpf_t sqrt2, _2sqrt2;
@@ -116,7 +125,7 @@ int main() {
     mpf_clear(pi_inverse);
     mpf_clear(_1);
 
-    gmp_printf("%.100000Ff\n", pi);
+    gmp_printf("%.1000000Ff\n", pi);
     mpf_clear(pi);
 
     return 0;
