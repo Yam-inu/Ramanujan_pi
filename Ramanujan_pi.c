@@ -6,7 +6,7 @@
 #include <math.h>
 #include <omp.h>
 
-#define EXPECT_DIGIT 10000
+#define EXPECT_DIGIT 100000
 
 int REPEAT_NUM = EXPECT_DIGIT/7.9; // 繰り返し回数
 int INIT_BIT = EXPECT_DIGIT*3.4;     // 変数が確保する領域
